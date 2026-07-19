@@ -12,9 +12,9 @@ const registerUserIntoDB = async (payload: RegisterUserPayload) => {
     },
   });
 
-  if (isUserExit) {
-    throw new Error("User with this email already exists.");
-  }
+  // if (isUserExit) {
+  //   throw new Error("User with this email already exists.");
+  // }
 
   // Hash password
   const hashPassword = await bcrypt.hash(
@@ -68,7 +68,35 @@ const getMyProfileFromDB = async (userId: string) => {
   return user;
 };
 
+const updatedMyProfileInDB = async (userId: string, payload: any) => {
+  const { name, email, profilePhoto, bio } = payload;
+
+  const updatedUser = await prisma.user.update({
+    where: {
+      id: userId,
+    },
+    data: {
+      name,
+      email,
+      profile: {
+        update: {
+          profilePhoto,
+          bio,
+        },
+      },
+    },
+    omit: {
+      password: true,
+    },
+    include: {
+      profile: true,
+    },
+  });
+  return updatedUser;
+};
+
 export const userService = {
   registerUserIntoDB,
   getMyProfileFromDB,
+  updatedMyProfileInDB,
 };
